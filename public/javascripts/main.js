@@ -1,5 +1,8 @@
 (function() {
-  var socket = io('http://localhost:3000');
+  //Colocar o ip do 'localhost'
+  //Se colocar localhost, irá funcionar somente no LocalHost
+  //Se acessar de outro ip, o socket io não irá funcionar
+  var socket = io('http://192.168.0.19:3000');
   socket.on('hello', function(msg){
     console.log(msg);
 
@@ -163,8 +166,7 @@ myChart.setOption({
             name:'Umidade (%)',
             type:'line',
             data:''
-        }
-    ]
+        }]
   });
 }
 
