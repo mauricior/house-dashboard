@@ -133,11 +133,12 @@ function onClientConnected(socket) {
     lastUmid = umid;
     umid = aux[3];
     //Pega a data do local
-    var date = moment().tz("America/Sao_Paulo").format();
+    var date = moment().format('DD/MM/YYYY HH:mm:ss');
+    //var dataTimezoneBrasil = data.tz('America/Sao_Paulo').format('DD/MM/YYYY HH:mm:ss');
 
     //Manda mensagem para o front via socket io
-    client.emit('temp', {title: 'Atualiza Temp', msg: temp, data: date});
-    client.emit('umid', {title: 'Atualiza Umid', msg: umid, data: date});
+    client.emit('valores', {title: 'Atualiza Valores', temperatura: temp, umidade: umid, data: date});
+    //client.emit('umid', {title: 'Atualiza Umid', msg: umid, data: date});
 
     console.log(`${clientName} data received: ${m}`);
 

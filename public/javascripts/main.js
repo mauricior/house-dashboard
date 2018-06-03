@@ -5,10 +5,10 @@
 
   });
 
-var temp = 0;
-var dataTemp = 0;
-var umid = 0;
-var dataUmid = 0;
+var tempValue = 0;
+var umidValue = 0;
+var dataValue = 0;
+
 
 var historianTemp = []
 var historianUmid = []
@@ -24,7 +24,11 @@ socket.on('allValues', function(msg) {
   for (var i = 0; i < msg.data.length; i++) {
     historianTemp.push(msg.data[i].temperatura);
     historianUmid.push(msg.data[i].umidade);
-    historianDates.push(msg.data[i].data);
+    //Converte a data
+    var dataTimezoneZero = moment(msg.data[i].data);
+    var dataTimezoneBrasil = dataTimezoneZero.tz('America/Sao_Paulo').format('DD/MM/YYYY HH:mm:ss');
+    //console.log();
+    historianDates.push(dataTimezoneBrasil);
   }
 
 
@@ -54,23 +58,27 @@ socket.on('allValues', function(msg) {
 
 //Aguardo o servidor do back-end me mandar a 'tag' de temperatura e a mensagem com o valor
 //lido pelo sensor e a data
-  socket.on('temp', function(msg) {
+  socket.on('valores', function(msg) {
     console.log(msg);
 
     //Atualizo o html com o valor lido em tempo real
     //Separo as variaveis de temperatura e data
-    document.getElementById('temp').innerHTML = msg.msg + "°C";
-    temp = msg.msg;
-    dataTemp = msg.data;
+    document.getElementById('temp').innerHTML = msg.temperatura + "°C";
+    document.getElementById('umid').innerHTML = msg.umidade + "%";
+    tempValue = msg.temperatura;
+    dataValue = msg.data;
+    umidValue = msg.umidade;
 
     //Salvo leitura a leitura a data em um array para posteriormente atualizar nosso gráfico
-    historianDates.push(dataTemp);
+    historianDates.push(dataValue);
     //console.log("Historico Datas: " + historianTempDates);
 
     //Salvo leitura a leitura o valor lido em um array para posteriormente atualizar nosso gráfico
-    historianTemp.push(temp);
+    historianTemp.push(tempValue);
     //console.log("Historico Temp: " + historianTemp)
 
+    //Salvo leitura a leitura o valor lido em um array para posteriormente atualizar nosso gráfico
+    historianUmid.push(umidValue);
 
     //A cada leitura realizada pelo sensor atualizo o gráfico com os dados atuais
     myChart.setOption({
@@ -81,7 +89,13 @@ socket.on('allValues', function(msg) {
           },
           data: historianDates
       },
-        series: [{
+        series: [
+          {
+              // find series by name
+              name: 'Umidade (%)',
+              data: historianUmid
+          },
+          {
             // find series by name
             name: 'Temperatura (Celsius)',
             data: historianTemp
@@ -90,44 +104,6 @@ socket.on('allValues', function(msg) {
 
 
 });
-
-
-//Aguardo o servidor do back-end me mandar a 'tag' de umidade e a mensagem com o valor
-//lido pelo sensor e a data
-  socket.on('umid', function(msg) {
-    console.log(msg);
-
-    //Atualizo o html com o valor lido em tempo real
-    //Separo as variaveis de umidade e data
-    document.getElementById('umid').innerHTML = msg.msg + "%";
-    umid = msg.msg;
-    dataUmid = msg.data;
-
-    //Salvo leitura a leitura a data em um array para posteriormente atualizar nosso gráfico
-    historianDates.push(dataUmid);
-
-    //Salvo leitura a leitura o valor lido em um array para posteriormente atualizar nosso gráfico
-    historianUmid.push(umid);
-
-
-    //A cada leitura realizada pelo sensor atualizo o gráfico com os dados atuais
-    myChart.setOption({
-      xAxis: {
-          type: 'category',
-          splitLine: {
-            show: false
-          },
-          data: historianDates
-      },
-        series: [{
-            // find series by name
-            name: 'Umidade (%)',
-            data: historianUmid
-        }]
-    });
-
-});
-
 
 
 
@@ -144,7 +120,7 @@ myChart.setOption({
         trigger: 'axis'
     },
     legend: {
-        data:['Temperatura (Celsius)', 'Umidade (%)'],
+        data:['Umidade (%)','Temperatura (Celsius)'],
         position: 'bottom'
     },
     dataZoom: [
